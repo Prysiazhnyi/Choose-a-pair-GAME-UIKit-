@@ -1,24 +1,87 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="13122.16" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="23504" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="ElI-n0-kI3">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13104.12"/>
-        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23506"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="collection view cell content view" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
         <!--View Controller-->
-        <scene sceneID="tne-QT-ifu">
+        <scene sceneID="CH6-Fv-C7m">
             <objects>
-                <viewController id="BYZ-38-t0r" customClass="ViewController" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                <collectionViewController id="eHa-XE-lVm" customClass="ViewController" customModule="Lessons_99" customModuleProvider="target" sceneMemberID="viewController">
+                    <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" id="pru-wM-UX7">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" xcode11CocoaTouchSystemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
-                        <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
-                    </view>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="6EA-9K-sEp">
+                            <size key="itemSize" width="145" height="145"/>
+                            <size key="headerReferenceSize" width="0.0" height="0.0"/>
+                            <size key="footerReferenceSize" width="0.0" height="0.0"/>
+                            <inset key="sectionInset" minX="10" minY="10" maxX="10" maxY="10"/>
+                        </collectionViewFlowLayout>
+                        <cells>
+                            <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="ImageView" id="Bt1-Dl-w4c">
+                                <rect key="frame" x="10" y="10" width="145" height="145"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <collectionViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="mmI-ct-omW">
+                                    <rect key="frame" x="0.0" y="0.0" width="145" height="145"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                    <subviews>
+                                        <imageView clipsSubviews="YES" userInteractionEnabled="NO" tag="1000" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="mouse.png" translatesAutoresizingMaskIntoConstraints="NO" id="S1I-WV-YK2">
+                                            <rect key="frame" x="0.0" y="0.0" width="145" height="145"/>
+                                        </imageView>
+                                    </subviews>
+                                    <constraints>
+                                        <constraint firstItem="S1I-WV-YK2" firstAttribute="top" secondItem="mmI-ct-omW" secondAttribute="top" id="3mH-2z-say"/>
+                                        <constraint firstItem="S1I-WV-YK2" firstAttribute="centerX" secondItem="mmI-ct-omW" secondAttribute="centerX" id="4GV-S5-jAg"/>
+                                        <constraint firstItem="S1I-WV-YK2" firstAttribute="leading" secondItem="mmI-ct-omW" secondAttribute="leading" id="DQf-Jq-XHC"/>
+                                        <constraint firstItem="S1I-WV-YK2" firstAttribute="top" secondItem="mmI-ct-omW" secondAttribute="top" id="KAx-gL-kfY"/>
+                                        <constraint firstItem="S1I-WV-YK2" firstAttribute="centerY" secondItem="mmI-ct-omW" secondAttribute="centerY" id="O2J-Ql-6ZT"/>
+                                        <constraint firstAttribute="trailing" secondItem="S1I-WV-YK2" secondAttribute="trailing" id="VmG-Gk-mPm"/>
+                                        <constraint firstItem="S1I-WV-YK2" firstAttribute="leading" secondItem="mmI-ct-omW" secondAttribute="leading" id="gRo-pQ-rma"/>
+                                        <constraint firstAttribute="bottom" secondItem="S1I-WV-YK2" secondAttribute="bottom" id="y6N-bC-ZvK"/>
+                                    </constraints>
+                                </collectionViewCellContentView>
+                            </collectionViewCell>
+                        </cells>
+                        <connections>
+                            <outlet property="dataSource" destination="eHa-XE-lVm" id="kyD-fW-SCd"/>
+                            <outlet property="delegate" destination="eHa-XE-lVm" id="oco-cl-u2G"/>
+                        </connections>
+                    </collectionView>
+                    <navigationItem key="navigationItem" id="eRb-bU-LMP"/>
+                </collectionViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="QSB-Rh-eRT" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
+            <point key="canvasLocation" x="943.47826086956525" y="-93.080357142857139"/>
+        </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="JMD-M0-Dvz">
+            <objects>
+                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="ElI-n0-kI3" sceneMemberID="viewController">
+                    <toolbarItems/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="0Bh-Pj-9Fl">
+                        <rect key="frame" x="0.0" y="48" width="414" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <nil name="viewControllers"/>
+                    <connections>
+                        <segue destination="eHa-XE-lVm" kind="relationship" relationship="rootViewController" id="24l-E4-fI2"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="22Y-CS-eOd" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="33.333333333333336" y="-93.080357142857139"/>
         </scene>
     </scenes>
+    <resources>
+        <image name="mouse.png" width="177" height="294"/>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
 </document>
