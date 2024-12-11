@@ -47,7 +47,7 @@ class ViewController: UICollectionViewController {
     
     func imageRandom() {
         // Пока в массиве imagesPlay меньше 4 элементов
-        while imagesPlay.count < 4 {
+        while imagesPlay.count < 8 {
             // Получаем случайный элемент из массива images
             if let randomImage = images.randomElement(), let index = images.firstIndex(of: randomImage) {
                 // Добавляем его в массив imagesPlay
@@ -62,7 +62,7 @@ class ViewController: UICollectionViewController {
         // Дублируем элементы, чтобы создать пары
         //imagesPlay = tempImagePlay + tempImagePlay
         
-        imagesPlay += imagesPlay
+        //imagesPlay += imagesPlay
         
         // Перемешиваем массив
         imagesPlay.shuffle()
@@ -131,17 +131,19 @@ class ViewController: UICollectionViewController {
         
         if firstImage == secondImage {
             print("Пары совпали!")
+            if !imagesPlay.isEmpty {
             // Удаляем изображения из массива imagesPlay
             imagesPlay.remove(at: firstIndex.item)
             imagesPlay.remove(at: secondIndex.item)
-            
+            //imagesPlay.removeAll { $0 == firstImage }
+            print("imagesPlay тут осталось -\(imagesPlay.count)")
             // Обновляем коллекцию, удаляя элементы с анимацией
             collectionView.performBatchUpdates({
                 collectionView.deleteItems(at: [firstIndex, secondIndex])
             }, completion: nil)
             
-            if !images.isEmpty {
-                imageRandom()
+            //if !images.isEmpty {
+              //  imageRandom()
                 collectionView.reloadData()
             }
             
