@@ -9,8 +9,9 @@ import UIKit
 
 class ViewController: UICollectionViewController {
     
-    var images = [UIImage]()
-    var imagesPlay = [UIImage]()
+    var images = [imageViewStruct]()
+    var imagesPlay = [imageViewStruct]()
+    //var id = NSUUID().uuidString
     
     var firstSelectedIndex: IndexPath?
     var secondSelectedIndex: IndexPath?
@@ -36,8 +37,10 @@ class ViewController: UICollectionViewController {
             if item.hasSuffix(".png") {
                 // Путь к изображению
                 let imagePath = "\(path)/\(item)"
+               //id = NSUUID().uuidString
                 if let image = UIImage(contentsOfFile: imagePath) {
-                    images.append(image) // Добавляем изображение в массив
+                    let imageStruct = imageViewStruct(id: UUID().uuidString, imageStruct: image)
+                    images.append(imageStruct) // Добавляем изображение в массив
                 }
             }
         }
@@ -49,7 +52,7 @@ class ViewController: UICollectionViewController {
         // Пока в массиве imagesPlay меньше 4 элементов
         while imagesPlay.count < 8 {
             // Получаем случайный элемент из массива images
-            if let randomImage = images.randomElement(), let index = images.firstIndex(of: randomImage) {
+            if let randomImage = images.randomElement(), let index = images.firstIndex(where: { $0.id == randomImage.id }) {
                 // Добавляем его в массив imagesPlay
                 imagesPlay.append(randomImage)
                 imagesPlay.append(randomImage)
@@ -83,8 +86,9 @@ class ViewController: UICollectionViewController {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "ImageView", for: indexPath)
         
         if let imageView = cell.viewWithTag(1000) as? UIImageView {
-            imageView.image = imagesPlay[indexPath.item]
-        }
+            let imageStruct = imagesPlay[indexPath.item]
+                   imageView.image = imageStruct.shown ? imageStruct.imageStruct : nil // Показываем или скрываем
+               }
         
         // Добавляем обработку выбора ячейки
         cell.isUserInteractionEnabled = true
@@ -108,6 +112,9 @@ class ViewController: UICollectionViewController {
             
             if indexPath == firstSelectedIndex {
                 print("Нельзя выбрать ту же ячейку дважды!")
+                firstSelectedIndex = nil
+                secondSelectedIndex = nil
+                isFirstSelection = true
                 return
             }
             
@@ -127,31 +134,33 @@ class ViewController: UICollectionViewController {
         let firstImage = imagesPlay[firstIndex.item]
         let secondImage = imagesPlay[secondIndex.item]
         
-        print(" firstImage ---\(firstIndex.item) ;  secondImage----\(secondIndex.item)")
-        
-        if firstImage == secondImage {
+        if firstImage.id == secondImage.id {
             print("Пары совпали!")
-            if !imagesPlay.isEmpty {
-            // Удаляем изображения из массива imagesPlay
-            imagesPlay.remove(at: firstIndex.item)
-            imagesPlay.remove(at: secondIndex.item)
-            //imagesPlay.removeAll { $0 == firstImage }
-            print("imagesPlay тут осталось -\(imagesPlay.count)")
-            // Обновляем коллекцию, удаляя элементы с анимацией
+            
+            // Удаляем элементы с совпадающим id
+            let targetId = firstImage.id
+            imagesPlay.removeAll { $0.id == targetId }
+            
+            print("imagesPlay тут осталось - \(imagesPlay.count) элементов.")
+            
+           //collectionView.reloadData()
+            // Обновляем коллекцию с анимацией
             collectionView.performBatchUpdates({
                 collectionView.deleteItems(at: [firstIndex, secondIndex])
             }, completion: nil)
             
-            //if !images.isEmpty {
-              //  imageRandom()
-                collectionView.reloadData()
+            if imagesPlay.isEmpty {
+                if !images.isEmpty
+                {
+                    imageRandom()
+                    print("В ролительском массиве больше нет изображений")
+                }
+                print("Массив пустой, игра закончена \(imagesPlay.count)")
             }
-            
         } else {
             print("Пары не совпали.")
-            // Можно скрыть их (или вернуть на исходное состояние)
+            // Логика для скрытия изображений
         }
-        
         // Сбрасываем выбор
         firstSelectedIndex = nil
         secondSelectedIndex = nil
