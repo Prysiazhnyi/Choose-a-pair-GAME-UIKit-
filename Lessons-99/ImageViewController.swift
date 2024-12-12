@@ -14,7 +14,7 @@ struct imageViewStruct {
     var shown: Bool = true
     var imageStruct: UIImage!
     
-    static func == (lhs: imageViewStruct, rhs: imageViewStruct) -> Bool {
-        return lhs.id == rhs.id
-    }
+//    static func == (lhs: imageViewStruct, rhs: imageViewStruct) -> Bool {
+//        return lhs.id == rhs.id
+//    }
 }

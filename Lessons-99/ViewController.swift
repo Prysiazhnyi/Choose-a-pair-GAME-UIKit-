@@ -11,16 +11,38 @@ class ViewController: UICollectionViewController {
     
     var images = [imageViewStruct]()
     var imagesPlay = [imageViewStruct]()
-    //var id = NSUUID().uuidString
     
     var firstSelectedIndex: IndexPath?
     var secondSelectedIndex: IndexPath?
     var isFirstSelection = true // Для определения первой ли это выборки
     
+    // UIBarButtonItem для отображения счета
+    var scoreButton: UIBarButtonItem!
+    var score = 0 {
+        didSet {
+            // Обновляем UIBarButtonItem при изменении счета
+            scoreButton.title = "Score: \(score)"
+        }
+    }
+    
+    // UIBarButtonItem для отображения счета
+    var pairButton: UIBarButtonItem!
+    var pairs = 0 {
+        didSet {
+            // Обновляем UIBarButtonItem при изменении счета
+            pairButton.title = "Pairs Left: \(pairs)"
+        }
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
         title = "Choose a pair"
+    
+        scoreButton = UIBarButtonItem(title: "Score: 0", style: .plain, target: self, action: nil)
+        pairButton = UIBarButtonItem(title: "Pairs Left: 0", style: .plain, target: self, action: nil)
+        navigationItem.rightBarButtonItem = scoreButton
+        navigationItem.leftBarButtonItem = pairButton
         
         loadImages()
         imageRandom()
@@ -41,6 +63,7 @@ class ViewController: UICollectionViewController {
                 if let image = UIImage(contentsOfFile: imagePath) {
                     let imageStruct = imageViewStruct(id: UUID().uuidString, imageStruct: image)
                     images.append(imageStruct) // Добавляем изображение в массив
+                    pairs = images.count
                 }
             }
         }
@@ -49,7 +72,6 @@ class ViewController: UICollectionViewController {
     }
     
     func imageRandom() {
-        // Пока в массиве imagesPlay меньше 4 элементов
         while imagesPlay.count < 8 {
             // Получаем случайный элемент из массива images
             if let randomImage = images.randomElement(), let index = images.firstIndex(where: { $0.id == randomImage.id }) {
@@ -60,23 +82,13 @@ class ViewController: UICollectionViewController {
                 images.remove(at: index)
             }
         }
-        print("В массиве imagePlay \(imagesPlay.count) элементов.")
-        
-        // Дублируем элементы, чтобы создать пары
-        //imagesPlay = tempImagePlay + tempImagePlay
-        
-        //imagesPlay += imagesPlay
-        
+
         // Перемешиваем массив
         imagesPlay.shuffle()
+        collectionView.reloadData()
         print("В массиве imagePlay после дублирования \(imagesPlay.count) элементов.")
         print("В массиве imageы ОСТАЛОСЬ \(images.count) элементов.")
-        
-        // Обновляем коллекцию
-        collectionView.reloadData()
     }
-    
-    
     
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return imagesPlay.count
@@ -101,9 +113,6 @@ class ViewController: UICollectionViewController {
     @objc func cellTapped(_ sender: UITapGestureRecognizer) {
         guard let tappedCell = sender.view as? UICollectionViewCell else { return }
         guard let indexPath = collectionView.indexPath(for: tappedCell) else { return }
-        
-        print("indexPath  -- \(indexPath)")
-        
         // Если это первый выбор
         if isFirstSelection {
             firstSelectedIndex = indexPath
@@ -111,10 +120,7 @@ class ViewController: UICollectionViewController {
         } else {
             
             if indexPath == firstSelectedIndex {
-                print("Нельзя выбрать ту же ячейку дважды!")
-                firstSelectedIndex = nil
-                secondSelectedIndex = nil
-                isFirstSelection = true
+                resetSelection()
                 return
             }
             
@@ -136,15 +142,11 @@ class ViewController: UICollectionViewController {
         
         if firstImage.id == secondImage.id {
             print("Пары совпали!")
-            
+            score += 1
+            pairs -= 1
             // Удаляем элементы с совпадающим id
             let targetId = firstImage.id
             imagesPlay.removeAll { $0.id == targetId }
-            
-            print("imagesPlay тут осталось - \(imagesPlay.count) элементов.")
-            
-           //collectionView.reloadData()
-            // Обновляем коллекцию с анимацией
             collectionView.performBatchUpdates({
                 collectionView.deleteItems(at: [firstIndex, secondIndex])
             }, completion: nil)
@@ -153,17 +155,46 @@ class ViewController: UICollectionViewController {
                 if !images.isEmpty
                 {
                     imageRandom()
-                    print("В ролительском массиве больше нет изображений")
                 }
-                print("Массив пустой, игра закончена \(imagesPlay.count)")
             }
         } else {
             print("Пары не совпали.")
-            // Логика для скрытия изображений
+            if score != 0 {
+                score -= 1
+            }
         }
-        // Сбрасываем выбор
+        resetSelection()
+        if pairs == 0 {
+            showGameOverAlert()
+        }
+    }
+    /// Сбрасываем выбор/
+    func resetSelection() {
         firstSelectedIndex = nil
         secondSelectedIndex = nil
         isFirstSelection = true
+    }
+    
+    func showGameOverAlert() {
+        let alert = UIAlertController(
+            title: "Game Over",
+            message: "Your final score is \(score). Would you like to play again?",
+            preferredStyle: .alert
+        )
+        let restartAction = UIAlertAction(title: "Play Again", style: .default) { [weak self] _ in
+            self?.restartGame()
+        }
+        alert.addAction(restartAction)
+        present(alert, animated: true, completion: nil)
+    }
+/// Перезапуск игрs: сброс счетчиков и обновляем изображения/
+    func restartGame() {
+        
+        score = 0
+        images = []
+        imagesPlay = []
+        loadImages()
+        imageRandom()
+        collectionView.reloadData()
     }
 }
