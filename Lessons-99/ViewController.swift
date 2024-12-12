@@ -11,6 +11,7 @@ class ViewController: UICollectionViewController {
     
     var images = [imageViewStruct]()
     var imagesPlay = [imageViewStruct]()
+    var questionTempView = [UIImage]()
     
     var firstSelectedIndex: IndexPath?
     var secondSelectedIndex: IndexPath?
@@ -38,14 +39,16 @@ class ViewController: UICollectionViewController {
         super.viewDidLoad()
         
         title = "Choose a pair"
-    
+        
         scoreButton = UIBarButtonItem(title: "Score: 0", style: .plain, target: self, action: nil)
         pairButton = UIBarButtonItem(title: "Pairs Left: 0", style: .plain, target: self, action: nil)
         navigationItem.rightBarButtonItem = scoreButton
         navigationItem.leftBarButtonItem = pairButton
         
+        loadQuestionImages()
         loadImages()
         imageRandom()
+        
     }
     
     func loadImages() {
@@ -56,12 +59,11 @@ class ViewController: UICollectionViewController {
         
         for item in items {
             // Проверяем, что файл имеет расширение .png
-            if item.hasSuffix(".png") {
+            if item.hasSuffix("-@2x.png") {
                 // Путь к изображению
                 let imagePath = "\(path)/\(item)"
-               //id = NSUUID().uuidString
                 if let image = UIImage(contentsOfFile: imagePath) {
-                    let imageStruct = imageViewStruct(id: UUID().uuidString, imageStruct: image)
+                    let imageStruct = imageViewStruct(id: UUID().uuidString, imageStruct: image, questionView: questionTempView.first)
                     images.append(imageStruct) // Добавляем изображение в массив
                     pairs = images.count
                 }
@@ -69,6 +71,13 @@ class ViewController: UICollectionViewController {
         }
         
         print("Загружено \(images.count) изображений.")
+    }
+    
+    func loadQuestionImages() {
+        if let image = UIImage(named: "questionView") {
+            questionTempView.append(image)
+        }
+        print("Загружено \(questionTempView.count) изображений.")
     }
     
     func imageRandom() {
@@ -82,7 +91,7 @@ class ViewController: UICollectionViewController {
                 images.remove(at: index)
             }
         }
-
+        
         // Перемешиваем массив
         imagesPlay.shuffle()
         collectionView.reloadData()
@@ -99,8 +108,8 @@ class ViewController: UICollectionViewController {
         
         if let imageView = cell.viewWithTag(1000) as? UIImageView {
             let imageStruct = imagesPlay[indexPath.item]
-                   imageView.image = imageStruct.shown ? imageStruct.imageStruct : nil // Показываем или скрываем
-               }
+            imageView.image = imageStruct.shown ? imageStruct.imageStruct : imageStruct.questionView // Показываем или скрываем
+        }
         
         // Добавляем обработку выбора ячейки
         cell.isUserInteractionEnabled = true
@@ -113,6 +122,9 @@ class ViewController: UICollectionViewController {
     @objc func cellTapped(_ sender: UITapGestureRecognizer) {
         guard let tappedCell = sender.view as? UICollectionViewCell else { return }
         guard let indexPath = collectionView.indexPath(for: tappedCell) else { return }
+        
+        animatingView(tappedCell: tappedCell, indexPath: indexPath)
+        
         // Если это первый выбор
         if isFirstSelection {
             firstSelectedIndex = indexPath
@@ -144,30 +156,43 @@ class ViewController: UICollectionViewController {
             print("Пары совпали!")
             score += 1
             pairs -= 1
-            // Удаляем элементы с совпадающим id
-            let targetId = firstImage.id
-            imagesPlay.removeAll { $0.id == targetId }
-            collectionView.performBatchUpdates({
-                collectionView.deleteItems(at: [firstIndex, secondIndex])
-            }, completion: nil)
             
-            if imagesPlay.isEmpty {
-                if !images.isEmpty
-                {
-                    imageRandom()
-                }
+            // Ожидаем завершения анимации второй карточки
+            if let secondCell = collectionView.cellForItem(at: secondIndex),
+               let secondImageView = secondCell.viewWithTag(1000) as? UIImageView {
+                UIView.transition(with: secondImageView, duration: 0.5, options: .transitionFlipFromLeft, animations: {
+                    secondImageView.image = secondImage.imageStruct
+                }, completion: { _ in
+                    // После завершения анимации удаляем элементы
+                    self.collectionView.performBatchUpdates({
+                        self.imagesPlay.removeAll { $0.id == firstImage.id }
+                        self.collectionView.deleteItems(at: [firstIndex, secondIndex])
+                    }, completion: nil)
+                    
+                    if self.imagesPlay.isEmpty && !self.images.isEmpty {
+                        self.imageRandom()
+                    }
+                    
+                    if self.pairs == 0 {
+                        self.showGameOverAlert()
+                    }
+                })
             }
         } else {
             print("Пары не совпали.")
             if score != 0 {
                 score -= 1
             }
+            
+            // Запланировать переворот карточек обратно
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                self.flipCard(at: firstIndex) // Переворот первой карточки обратно
+                self.flipCard(at: secondIndex) // Переворот второй карточки обратно
+            }
         }
         resetSelection()
-        if pairs == 0 {
-            showGameOverAlert()
-        }
     }
+    
     /// Сбрасываем выбор/
     func resetSelection() {
         firstSelectedIndex = nil
@@ -187,7 +212,7 @@ class ViewController: UICollectionViewController {
         alert.addAction(restartAction)
         present(alert, animated: true, completion: nil)
     }
-/// Перезапуск игрs: сброс счетчиков и обновляем изображения/
+    /// Перезапуск игрs: сброс счетчиков и обновляем изображения/
     func restartGame() {
         
         score = 0
@@ -196,5 +221,39 @@ class ViewController: UICollectionViewController {
         loadImages()
         imageRandom()
         collectionView.reloadData()
+    }
+    
+    func animatingView(tappedCell: UICollectionViewCell, indexPath: IndexPath) {
+        var imageStruct = imagesPlay[indexPath.item]
+        
+        // Инвертируем состояние `shown`
+        imageStruct.shown.toggle()
+        imagesPlay[indexPath.item] = imageStruct
+        
+        // Анимация переворота
+        if let imageView = tappedCell.viewWithTag(1000) as? UIImageView {
+            let newImage = imageStruct.shown ? imageStruct.imageStruct : imageStruct.questionView
+            UIView.transition(with: imageView, duration: 0.5, options: .transitionFlipFromLeft, animations: {
+                imageView.image = newImage
+            })
+        }
+    }
+    
+    func flipCard(at indexPath: IndexPath) {
+        // Инвертируем состояние "shown"
+        imagesPlay[indexPath.item].shown.toggle()
+        
+        if let cell = collectionView.cellForItem(at: indexPath),
+           let imageView = cell.viewWithTag(1000) as? UIImageView {
+            
+            let newImage = imagesPlay[indexPath.item].shown
+            ? imagesPlay[indexPath.item].imageStruct
+            : imagesPlay[indexPath.item].questionView
+            
+            // Анимация переворота
+            UIView.transition(with: imageView, duration: 0.5, options: .transitionFlipFromLeft, animations: {
+                imageView.image = newImage
+            })
+        }
     }
 }

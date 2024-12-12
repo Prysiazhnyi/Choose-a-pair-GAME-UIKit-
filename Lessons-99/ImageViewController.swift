@@ -11,10 +11,7 @@ import UIKit
 struct imageViewStruct {
     
     var id: String
-    var shown: Bool = true
+    var shown: Bool = false
     var imageStruct: UIImage!
-    
-//    static func == (lhs: imageViewStruct, rhs: imageViewStruct) -> Bool {
-//        return lhs.id == rhs.id
-//    }
+    var questionView: UIImage!
 }
